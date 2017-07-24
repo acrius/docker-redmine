@@ -1,0 +1,42 @@
+version: '2'
+
+services:
+    redmine_data:
+        image: acrius/redmine_data
+        container_name: redmine_data
+        environment:
+        - DB_USER=redmine
+        - DB_PASS=thisisredminepassword
+        - DB_NAME=redmine_production
+        ports:
+        - '9876:5432'
+        volumes:
+        - ./database/data:/var/lib/postgresql
+        restart: always
+
+    redmine_server:
+        build: .
+        container_name: redmine_server
+        depends_on:
+        - redmine_data
+        environment:
+        - TZ=Asia/Krasnoyarsk
+
+        - DB_ADAPTER=postgresql
+        - DB_HOST=redmine_data
+        - DB_PORT=5432
+        - DB_USER=redmine
+        - DB_PASS=thisisredminepassword
+        - DB_REDMINE=redmine_production
+
+        - REDMINE_SUDO_MODE_ENABLE=false
+        - REDMINE_SECRET_TOKEN=
+
+        - REDMINE_CONCURENT_UPLOADS=2
+    
+        ports:
+        - "10083:80"
+        volumes:
+        - ./data:/home/redmine/data  
+        - ./log:/var/log/redmine 
+        restart: always     
